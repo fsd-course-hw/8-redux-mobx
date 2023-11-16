@@ -26,7 +26,7 @@ export const UsersPageProviers = ({
           if (session?.userId === userId) {
             await dispatch(sessionStore.actions.removeSession());
           }
-          await dispatch(boardsStore.actions.removeAuthorBoards({ userId }));
+          await boardsStore.removeAuthorBoards(userId);
         },
         renderUserAuthAction: (user) => {
           const canSignIn = ability.can(

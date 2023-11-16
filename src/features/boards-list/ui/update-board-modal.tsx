@@ -2,9 +2,9 @@ import { UiModal } from "@/shared/ui/ui-modal";
 import { UiButton } from "@/shared/ui/ui-button";
 import { Controller, useForm } from "react-hook-form";
 import { UiTextField } from "@/shared/ui/ui-text-field";
-import { useUpdateBoard } from "../model/use-update-board";
 import { BoardPartial, UpdateBoardData } from "@/entities/board";
 import { UserMultiSelect, UserSelect } from "@/entities/user";
+import { useBoardsListModel } from "../model/use-boards-list-model";
 
 export function UpdateBoardModal({
   onClose,
@@ -17,9 +17,11 @@ export function UpdateBoardModal({
     defaultValues: board,
   });
 
-  const { updateBoard } = useUpdateBoard(board);
+  const boardModel = useBoardsListModel();
 
-  const onSubmit = handleSubmit((data) => updateBoard(data, onClose));
+  const onSubmit = handleSubmit((data) =>
+    boardModel.updateBoard(board, data, onClose),
+  );
 
   return (
     <UiModal isOpen onClose={onClose} width="md">

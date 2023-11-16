@@ -1,11 +1,11 @@
 import { subject, useAbility } from "@/features/auth";
-import { boardsListDepsContext } from "@/features/boards-list";
+import { BoardsListModelProvider } from "@/features/boards-list";
 
 export function BoardListProvider({ children }: { children: React.ReactNode }) {
   const ability = useAbility();
   return (
-    <boardsListDepsContext.Provider
-      value={{
+    <BoardsListModelProvider
+      deps={{
         canCreateBoard: () => ability.can("create", "Board"),
         canViewBoard: (board) => ability.can("read", subject("Board", board)),
         canUpdateBoard: (board) =>
@@ -15,6 +15,6 @@ export function BoardListProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-    </boardsListDepsContext.Provider>
+    </BoardsListModelProvider>
   );
 }

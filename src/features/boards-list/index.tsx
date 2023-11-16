@@ -1,3 +1,3 @@
 export { BoardsList } from "./ui/boards-list";
-export { boardsListDepsContext } from "./deps";
 export { CreateBoardButton } from "./ui/create-board-button";
+export { BoardsListModelProvider } from "./model/use-boards-list-model";

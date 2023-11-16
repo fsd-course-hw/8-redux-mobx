@@ -16,7 +16,7 @@ export function AppLoader({ children }: { children?: ReactNode }) {
     Promise.all([
       dispatch(usersStore.actions.loadUsers()),
       dispatch(sessionStore.actions.loadSession()),
-      dispatch(boardsStore.actions.loadBoards()),
+      boardsStore.loadBoards(),
       dispatch(tasksStore.actions.loadTasks()),
     ]).finally(() => {
       setIsLoading(false);

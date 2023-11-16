@@ -1,129 +1,71 @@
+import { makeAutoObservable, runInAction } from "mobx";
 import { nanoid } from "nanoid";
-import { CreateBoardData, BoardPartial, UpdateBoardData } from "./types";
+import { CreateBoardData, UpdateBoardData, BoardPartial } from "./types";
 import { boardsRepository } from "./boards.repository";
-import {
-  createSlice,
-  createAsyncThunk,
-  createSelector,
-} from "@reduxjs/toolkit";
-import { createBaseSelector, registerSlice } from "@/shared/lib/redux";
 
-export type BoardsState = {
-  boards: BoardPartial[];
-};
+export class BoardsStore {
+  boards = [] as BoardPartial[];
 
-const initialState: BoardsState = {
-  boards: [],
-};
+  constructor() {
+    makeAutoObservable(this);
+  }
 
-const boardsSlice = createSlice({
-  name: "boards",
-  initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder.addCase(loadBoards.fulfilled, (state, action) => {
-      state.boards = action.payload;
+  async loadBoards() {
+    const boards = await boardsRepository.getBoards();
+    runInAction(() => {
+      this.boards = boards;
     });
-    builder.addCase(createBoard.fulfilled, (state, action) => {
-      state.boards.push(action.payload);
-    });
-    builder.addCase(updateBoard.fulfilled, (state, action) => {
-      state.boards = state.boards.map((board) => {
-        if (board.id === action.payload.id) {
-          return action.payload;
-        }
-        return board;
-      });
-    });
-    builder.addCase(removeBoard.fulfilled, (state, action) => {
-      state.boards = state.boards.filter(
-        (board) => board.id !== action.payload,
-      );
-    });
-  },
-});
+  }
 
-const boardsBaseSelector = createBaseSelector(boardsSlice);
-
-const selectBoardById = createSelector(
-  boardsBaseSelector,
-  (_: unknown, id?: string) => id,
-  (state, id) => {
-    if (!id) {
-      return;
-    }
-    return state.boards.find((board) => board.id === id);
-  },
-);
-const selectBoards = createSelector(boardsBaseSelector, (s) => s.boards);
-
-const loadBoards = createAsyncThunk("boards/loadboards", async () => {
-  const boards = await boardsRepository.getBoards();
-  return boards;
-});
-
-const createBoard = createAsyncThunk(
-  "boards/createBoard",
-  async (data: CreateBoardData) => {
+  async createBoard(data: CreateBoardData) {
     const newBoard = { id: nanoid(), ...data, cols: [] };
     await boardsRepository.saveBoard(newBoard);
-    return newBoard;
-  },
-);
+    runInAction(() => {
+      this.boards.push(newBoard);
+    });
+  }
 
-const updateBoard = createAsyncThunk(
-  "boards/updateBoard",
-  async (data: UpdateBoardData) => {
+  async updateBoard(data: UpdateBoardData) {
     const board = await boardsRepository.getBoard(data.id);
     if (!board) {
-      throw new Error();
+      return;
     }
-    const newBoard = { ...board, ...data };
-    await boardsRepository.saveBoard(newBoard);
-    return newBoard;
-  },
-);
+    const updatedBoard = { ...board, ...data };
+    await boardsRepository.saveBoard(updatedBoard);
+    runInAction(() => {
+      const boardIndex = this.boards.findIndex((board) => board.id === data.id);
+      this.boards[boardIndex] = updatedBoard;
+    });
+  }
 
-const removeBoard = createAsyncThunk(
-  "boards/removeBoard",
-  async (boardId: string) => {
+  async removeBoard(boardId: string) {
     await boardsRepository.removeBoard(boardId);
-    return boardId;
-  },
-);
+    runInAction(() => {
+      this.boards = this.boards.filter((board) => board.id !== boardId);
+    });
+  }
 
-const removeAuthorBoards = createAsyncThunk(
-  "boards/removeAuthorBoards",
-  async ({ userId }: { userId: string }, { getState, dispatch }) => {
-    const state = boardsBaseSelector(getState());
-
-    for await (const board of state.boards) {
-      const newBoard = {
-        ...board,
-        editorsIds: board.editorsIds.filter((id) => id !== userId),
-      };
+  async removeAuthorBoards(userId: string) {
+    for (const board of this.boards) {
+      const newEditorsIds = board.editorsIds.filter((id) => id !== userId);
+      const newBoard = { ...board, editorsIds: newEditorsIds };
 
       if (board.ownerId === userId) {
-        await dispatch(removeBoard(board.id));
+        await this.removeBoard(board.id);
       } else {
-        await dispatch(updateBoard(newBoard));
+        await this.updateBoard(newBoard);
       }
     }
-  },
-);
+  }
 
-registerSlice([boardsSlice]);
+  getBoardById(id: string): BoardPartial | undefined {
+    return this.boards.find((board) => board.id === id);
+  }
 
-export const boardsStore = {
-  actions: {
-    loadBoards,
-    createBoard,
-    updateBoard,
-    removeBoard,
-    removeAuthorBoards,
-  },
-  selectors: {
-    selectBoardById,
-    selectBoards,
-  },
-};
+  getBoards(): BoardPartial[] {
+    return this.boards;
+  }
+}
+
+// Usage:
+export const boardsStore = new BoardsStore();

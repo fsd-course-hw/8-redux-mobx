@@ -22,8 +22,8 @@ export function UserSelect({
 }) {
   let users = useAppSelector(usersStore.selectors.selectAll);
   users = users.filter(filterOptions);
-  const user = useAppSelector(
-    usersStore.selectors.selectById.bind(null, userId),
+  const user = useAppSelector((store) =>
+    userId ? usersStore.selectors.selectById(store, userId) : undefined,
   );
 
   const options = required ? users : [undefined, ...users];

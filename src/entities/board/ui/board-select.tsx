@@ -1,9 +1,9 @@
 import { BoardPartial } from "@/entities/board";
 import { UiSelect } from "@/shared/ui/ui-select-field";
 import { boardsStore } from "../model/boards.store";
-import { useAppSelector } from "@/shared/lib/redux";
+import { observer } from "mobx-react-lite";
 
-export function BoardSelect({
+export const BoardSelect = observer(function BoardSelect({
   className,
   label,
   onChangeBoardId,
@@ -21,10 +21,8 @@ export function BoardSelect({
   required?: boolean;
   filterOptions?: (board: BoardPartial) => boolean;
 }) {
-  const board = useAppSelector((store) =>
-    boardsStore.selectors.selectBoardById(store, boardId),
-  );
-  let boards = useAppSelector(boardsStore.selectors.selectBoards);
+  const board = boardId ? boardsStore.getBoardById(boardId) : undefined;
+  let boards = boardsStore.getBoards();
   boards = boards.filter(filterOptions);
 
   const options = required ? boards : [undefined, ...boards];
@@ -44,4 +42,4 @@ export function BoardSelect({
       getLabel={(board) => board?.title ?? ""}
     />
   );
-}
+});

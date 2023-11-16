@@ -3,8 +3,8 @@ import { UiButton } from "@/shared/ui/ui-button";
 import { Controller, useForm } from "react-hook-form";
 import { UiTextField } from "@/shared/ui/ui-text-field";
 import { CreateBoardData } from "@/entities/board";
-import { useCreateBoard } from "../model/use-create-board";
 import { UserMultiSelect } from "@/entities/user";
+import { useBoardsListModel } from "../model/use-boards-list-model";
 
 export function CreateBoardModal({ onClose }: { onClose: () => void }) {
   const { control, handleSubmit } = useForm<CreateBoardData>({
@@ -14,9 +14,11 @@ export function CreateBoardModal({ onClose }: { onClose: () => void }) {
     },
   });
 
-  const { createBoard } = useCreateBoard();
+  const boardModel = useBoardsListModel();
 
-  const onSubmit = handleSubmit((data) => createBoard(data, onClose));
+  const onSubmit = handleSubmit((data) =>
+    boardModel.createBoard(data, onClose),
+  );
 
   return (
     <UiModal isOpen onClose={onClose} width="md">
