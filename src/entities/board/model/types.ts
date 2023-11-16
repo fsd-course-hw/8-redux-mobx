@@ -32,6 +32,7 @@ export type CreateBoardData = {
 };
 
 export type UpdateBoardData = {
+  id: string;
   title?: string;
   ownerId?: string;
   editorsIds?: string[];

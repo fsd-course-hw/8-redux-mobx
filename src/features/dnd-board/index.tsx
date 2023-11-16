@@ -1,8 +1,4 @@
 export { BoardActions } from "./ui/board-actions";
 export { Board } from "./ui/board/board";
-export {
-  useBoardStoreFactory,
-  boardStoreContext,
-  useFetchBoard,
-} from "./model/use-board-store";
+export { useFetchBoard } from "./model/use-fetch-board";
 export { boardDepsContext } from "./deps";

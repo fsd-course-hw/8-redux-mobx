@@ -1,4 +1,4 @@
-import { Task, UpdateTaskData, useTasks } from "@/entities/task";
+import { Task, UpdateTaskData, tasksStore } from "@/entities/task";
 import {
   useFormContext,
   FormProvider,
@@ -10,6 +10,7 @@ import { UiTextField } from "@/shared/ui/ui-text-field";
 import { UserSelect } from "@/entities/user";
 import { useStrictContext } from "@/shared/lib/react";
 import { updateTaskModalDeps } from "../deps";
+import { useAppDispatch, useAppSelector } from "@/shared/lib/redux";
 
 export function UpdateTaskForm({
   children,
@@ -20,15 +21,20 @@ export function UpdateTaskForm({
   onSuccess: (task: Task) => void;
   taskId: string;
 }) {
-  const task = useTasks((s) => s.getTaskById(taskId));
-  const updateTask = useTasks((s) => s.updateTask);
+  const task = useAppSelector((s) => tasksStore.selectors.taskById(s, taskId));
+  const dispatch = useAppDispatch();
 
   const form = useForm<UpdateTaskData>({
     defaultValues: task,
   });
 
   const handleSumit = form.handleSubmit(async (data) => {
-    const newTask = await updateTask(taskId, data);
+    const newTask = await dispatch(
+      tasksStore.actions.updateTask({
+        ...data,
+        id: taskId,
+      }),
+    ).unwrap();
     onSuccess(newTask);
   });
 

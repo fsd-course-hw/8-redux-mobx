@@ -4,10 +4,10 @@ import { AppProvider } from "./app-provider";
 
 export function App() {
   return (
-    <AppLoader>
-      <AppProvider>
+    <AppProvider>
+      <AppLoader>
         <AppRouter />
-      </AppProvider>
-    </AppLoader>
+      </AppLoader>
+    </AppProvider>
   );
 }

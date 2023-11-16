@@ -1,12 +1,12 @@
 import { useGetConfirmation } from "@/shared/lib/confirmation";
-import { BoardPartial, useBoards } from "@/entities/board";
+import { BoardPartial, boardsStore } from "@/entities/board";
 import { useBoardsListDeps } from "../deps";
+import { useAppDispatch } from "@/shared/lib/redux";
 
 export function useRemoveBoard() {
+  const dispatch = useAppDispatch();
   const getConfirmation = useGetConfirmation();
   const { canRemoveBoard } = useBoardsListDeps();
-
-  const { removeBoard } = useBoards();
 
   return async (board: BoardPartial) => {
     const confirmation = await getConfirmation({
@@ -15,6 +15,6 @@ export function useRemoveBoard() {
 
     if (!confirmation || !canRemoveBoard(board)) return;
 
-    removeBoard(board.id);
+    await dispatch(boardsStore.actions.removeBoard(board.id));
   };
 }

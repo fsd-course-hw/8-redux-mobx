@@ -1,19 +1,18 @@
-import { useBoards } from "@/entities/board";
-import { AvatarsList, UserPreview, useUsers } from "@/entities/user";
+import { AvatarsList, UserPreview } from "@/entities/user";
 import { ROUTER_PATHS } from "@/shared/constants";
 import { Link, generatePath } from "react-router-dom";
 import { useBoardsListDeps } from "../deps";
 import { UpdateBoardButton } from "./update-board-button";
 import { RemoveBoardButton } from "./remove-board-button";
+import { useAppSelector } from "@/shared/lib/redux";
+import { selectBoards } from "../model/select-boards";
 
 const boardUrl = (boardId: string) =>
   generatePath(ROUTER_PATHS.HOME + ROUTER_PATHS.BOARD, { boardId });
 
 export function BoardsList({ className }: { className?: string }) {
-  const { canViewBoard, canUpdateBoard, canRemoveBoard } =
-    useBoardsListDeps();
-  const { boards } = useBoards();
-  const users = useUsers((s) => s.usersMap());
+  const { canViewBoard, canUpdateBoard, canRemoveBoard } = useBoardsListDeps();
+  const boards = useAppSelector(selectBoards);
 
   return (
     <div className={className}>
@@ -36,11 +35,11 @@ export function BoardsList({ className }: { className?: string }) {
                 </Link>
               </td>
               <td className="p-2">
-                <UserPreview size="md" {...users[board.ownerId]} />
+                <UserPreview size="md" {...board.owner} />
               </td>
               <td className="p-2">
                 <AvatarsList
-                  avatarsIds={board.editorsIds.map((id) => users[id].avatarId)}
+                  avatarsIds={board.editors.map((editor) => editor.avatarId)}
                 />
               </td>
               <td className="p-2">

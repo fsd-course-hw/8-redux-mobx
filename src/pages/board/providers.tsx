@@ -1,15 +1,14 @@
 import { Board as BoardType } from "@/entities/board";
 import { Session } from "@/entities/session";
-import { useTasks } from "@/entities/task";
+import { tasksStore } from "@/entities/task";
 import {
   boardDepsContext,
-  boardStoreContext,
-  useBoardStoreFactory,
 } from "@/features/dnd-board";
 import {
   updateTaskModalDeps,
   useUpdateTaskModal,
 } from "@/features/update-task-modal";
+import { useAppDispatch } from "@/shared/lib/redux";
 
 export function TaskEditorProvider({
   children,
@@ -37,18 +36,18 @@ export function BoardDepsProvider({
   children?: React.ReactNode;
   sesson: Session;
 }) {
-  const removeTask = useTasks((s) => s.removeTask);
-  const createTask = useTasks((s) => s.createTask);
+  const dispatch = useAppDispatch();
+
   const { modal, updateTask } = useUpdateTaskModal();
 
   return (
     <boardDepsContext.Provider
       value={{
         createBoardCard: async (title: string) => {
-          return await createTask({ authorId: sesson.userId, title });
+          return await dispatch(tasksStore.actions.createTask({ title, authorId: sesson.userId })).unwrap()
         },
         onBeforeRemoveBoardCard: async (id: string) => {
-          await removeTask(id);
+          await dispatch(tasksStore.actions.removeTask( id ));
         },
         updateBoardCard: async (board) => {
           return await updateTask(board.id);
@@ -61,17 +60,3 @@ export function BoardDepsProvider({
   );
 }
 
-export function BoardStoreProvider({
-  children,
-  board,
-}: {
-  children?: React.ReactNode;
-  board: BoardType;
-}) {
-  const { boardStore } = useBoardStoreFactory(board);
-  return (
-    <boardStoreContext.Provider value={boardStore}>
-      {children}
-    </boardStoreContext.Provider>
-  );
-}

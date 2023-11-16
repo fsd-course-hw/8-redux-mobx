@@ -1,16 +1,18 @@
-import { BoardPartial, UpdateBoardData, useBoards } from "@/entities/board";
+import { BoardPartial, UpdateBoardData, boardsStore } from "@/entities/board";
 import { useGetConfirmation } from "@/shared/lib/confirmation";
 import { useBoardsListDeps } from "../deps";
-import { useSession } from "@/entities/session";
+import { sessionStore } from "@/entities/session";
+import { useAppDispatch, useAppSelector } from "@/shared/lib/redux";
 
 export function useUpdateBoard(board?: BoardPartial) {
+  const dispatch = useAppDispatch();
   const getConfirmation = useGetConfirmation();
 
   const { canUpdateBoard } = useBoardsListDeps();
 
-  const ownerId = useSession((s) => s.currentSession?.userId);
-
-  const updateModalRaw = useBoards((s) => s.updateBoard);
+  const ownerId = useAppSelector(
+    (s) => sessionStore.selectors.selectSession(s)?.userId,
+  );
 
   const updateBoard = async (data: UpdateBoardData, onUpdate: () => void) => {
     if (!board || !canUpdateBoard(board)) return;
@@ -24,7 +26,7 @@ export function useUpdateBoard(board?: BoardPartial) {
       if (!confirmation) return;
     }
 
-    await updateModalRaw(board.id, data);
+    await dispatch(boardsStore.actions.updateBoard({ ...data, id: board.id }));
     onUpdate();
   };
 

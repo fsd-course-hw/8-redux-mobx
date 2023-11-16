@@ -1,4 +1,5 @@
-import { User, UserPreview, useUsers } from "@/entities/user";
+import { User, UserPreview, usersStore } from "@/entities/user";
+import { useAppSelector } from "@/shared/lib/redux";
 import { UiSelect } from "@/shared/ui/ui-select-field";
 
 export function UserSelect({
@@ -19,8 +20,12 @@ export function UserSelect({
   required?: boolean;
   filterOptions?: (option: User) => boolean;
 }) {
-  const user = useUsers((s) => (userId ? s.getUserById(userId) : undefined));
-  const users = useUsers((s) => s.users.filter(filterOptions));
+  let users = useAppSelector(usersStore.selectors.selectAll);
+  users = users.filter(filterOptions);
+
+  const user = useAppSelector((store) =>
+    userId ? usersStore.selectors.selectById(store, userId) : undefined,
+  );
 
   const options = required ? users : [undefined, ...users];
 
