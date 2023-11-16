@@ -7,8 +7,10 @@ export type ConfirmationParams = {
   confirmText?: string;
 };
 
+export type GetConfirmation = (params: ConfirmationParams) => Promise<boolean>;
+
 export type ConfirmationContext = {
-  getConfirmation: (params: ConfirmationParams) => Promise<boolean>;
+  getConfirmation: GetConfirmation;
   closeConfirmation: () => void;
 };
 

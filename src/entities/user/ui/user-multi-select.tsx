@@ -1,4 +1,5 @@
-import { User, UserPreview, useUsers } from "@/entities/user";
+import { User, UserPreview, usersStore } from "@/entities/user";
+import { useAppSelector } from "@/shared/lib/redux";
 import { UiMultipleSelect } from "@/shared/ui/ui-multiple-select";
 
 export function UserMultiSelect({
@@ -14,7 +15,8 @@ export function UserMultiSelect({
   label?: string;
   onChangeUserIds: (ids: string[]) => void;
 }) {
-  const users = useUsers((s) => s.users);
+  const users = useAppSelector(usersStore.selectors.selectAll);
+
   const selectedUsers = users.filter((u) => userIds.includes(u.id));
   const onChangeUsers = (users: User[]) => {
     onChangeUserIds(users.map((u) => u.id));

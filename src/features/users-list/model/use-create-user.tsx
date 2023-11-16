@@ -1,4 +1,5 @@
-import { useUsers } from "@/entities/user";
+import { usersStore } from "@/entities/user";
+import { useAppDispatch } from "@/shared/lib/redux";
 
 export type CreateUserFormData = {
   name: string;
@@ -6,8 +7,8 @@ export type CreateUserFormData = {
 };
 
 export function useCreateUser() {
-  const { createUser } = useUsers();
+  const dispatch = useAppDispatch();
   return (data: CreateUserFormData) => {
-    createUser?.(data);
+    dispatch(usersStore.actions.createUser(data));
   };
 }

@@ -1,48 +1,81 @@
 import { nanoid } from "nanoid";
-import { create } from "zustand";
 import { User } from "./types";
 import { usersRepository } from "./users.repository";
+import {
+  createEntityAdapter,
+  createSlice,
+  createAsyncThunk,
+  createSelector,
+} from "@reduxjs/toolkit";
+import { createBaseSelector, registerSlice } from "@/shared/lib/redux";
 
-type UsersStore = {
-  users: User[];
-  getUserById: (userId: string) => User | undefined;
-  usersMap: () => Record<string, User>;
-  loadUsers: () => Promise<void>;
-  createUser: (data: { name: string; avatarId: string }) => Promise<void>;
-  removeUser: (userId: string) => Promise<void>;
-};
+const usersAdapter = createEntityAdapter<User>({
+  selectId: (user) => user.id,
+});
 
-export const useUsers = create<UsersStore>((set, get) => ({
-  users: [],
-  loadUsers: async () => {
-    set({
-      users: await usersRepository.getUsers(),
+const usersSlice = createSlice({
+  name: "users",
+  initialState: usersAdapter.getInitialState(),
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(loadUsers.fulfilled, (state, action) => {
+      usersAdapter.setAll(state, action.payload);
+    });
+    builder.addCase(createUser.fulfilled, (state, action) => {
+      usersAdapter.addOne(state, action.payload);
+    });
+    builder.addCase(removeUser.fulfilled, (state, action) => {
+      usersAdapter.removeOne(state, action.payload);
     });
   },
+});
 
-  usersMap: () => {
-    return get().users.reduce(
-      (acc, user) => {
-        acc[user.id] = user;
-        return acc;
-      },
-      {} as Record<string, User>,
-    );
-  },
-  getUserById: (userId: string) => {
-    return get().users.find((user) => user.id === userId);
-  },
-  createUser: async (data) => {
+const usersBaseSelector = createBaseSelector(usersSlice);
+const adapterSelectors = usersAdapter.getSelectors(usersBaseSelector);
+const selectUsersMap = createSelector(adapterSelectors.selectAll, (users) =>
+  users.reduce(
+    (acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    },
+    {} as Record<string, User>,
+  ),
+);
+
+const loadUsers = createAsyncThunk("users/loadUsers", async () => {
+  const users = await usersRepository.getUsers();
+
+  return users;
+});
+
+const createUser = createAsyncThunk(
+  "users/createUser",
+  async (data: { name: string; avatarId: string }) => {
     const newUser = { id: nanoid(), ...data };
     await usersRepository.addUser(newUser);
-    set({
-      users: await usersRepository.getUsers(),
-    });
+    return newUser;
   },
-  removeUser: async (userId: string) => {
+);
+
+const removeUser = createAsyncThunk(
+  "users/removeUser",
+  async (userId: string) => {
     await usersRepository.removeUser(userId);
-    set({
-      users: await usersRepository.getUsers(),
-    });
+    return userId;
   },
-}));
+);
+
+registerSlice([usersSlice]);
+
+export const usersStore = {
+  actions: {
+    loadUsers,
+    createUser,
+    removeUser,
+  },
+  selectors: {
+    ...adapterSelectors,
+    selectUsersMap,
+  },
+  slice: usersSlice,
+};

@@ -7,7 +7,10 @@ import {
 } from "react-router-dom";
 import { ROUTER_PATHS } from "@/shared/constants";
 import { BoardsPage } from "@/pages/boards";
-import { BoardPage } from "@/pages/board";
+import { UiPageSpinner } from "@/shared/ui/ui-page-spinner";
+import { Suspense, lazy } from "react";
+
+const Board = lazy(() => import("@/pages/board"));
 
 const router = createBrowserRouter([
   {
@@ -20,7 +23,11 @@ const router = createBrowserRouter([
       },
       {
         path: ROUTER_PATHS.BOARD,
-        element: <BoardPage />,
+        element: (
+          <Suspense fallback={<UiPageSpinner />}>
+            <Board />
+          </Suspense>
+        ),
       },
       {
         path: ROUTER_PATHS.BOARDS,

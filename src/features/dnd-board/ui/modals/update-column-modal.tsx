@@ -2,7 +2,9 @@ import { UiButton } from "@/shared/ui/ui-button";
 import { UiModal } from "@/shared/ui/ui-modal";
 import { Controller, useForm } from "react-hook-form";
 import { UiTextField } from "@/shared/ui/ui-text-field";
-import { useBoardStore } from "../../model/use-board-store";
+import { useAppSelector } from "@/shared/lib/redux";
+import { boardStore } from "../../model/board.store";
+import { useBoardActions } from "../../model/use-board-actions";
 
 export function UpdateColumnModal({
   onClose,
@@ -11,21 +13,19 @@ export function UpdateColumnModal({
   columnId: string;
   onClose: () => void;
 }) {
-  const boardStore = useBoardStore();
-
-  const col = boardStore.useSelector((s) =>
-    s.board.cols.find((c) => c.id === columnId),
+  const column = useAppSelector((s) =>
+    boardStore.selectors.selectColumn(s, columnId),
   );
-  const updateColumn = useBoardStore().useSelector((s) => s.updateColumn);
+  const { updateColumn } = useBoardActions();
 
   const { control, handleSubmit } = useForm<{ title: string }>({
     defaultValues: {
-      title: col?.title,
+      title: column?.title,
     },
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    await updateColumn(columnId, data.title);
+    await updateColumn({ title: data.title, id: columnId });
     onClose();
   });
 

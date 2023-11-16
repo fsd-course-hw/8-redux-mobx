@@ -1,11 +1,13 @@
-import { useUsers } from "@/entities/user";
 import { useGetConfirmation } from "@/shared/lib/confirmation";
 import { useUsersLisetDesp } from "../deps";
+import { useAppDispatch } from "@/shared/lib/redux";
+import { usersStore } from "@/entities/user";
 
 export function useRemoveUser() {
+  const dispatch = useAppDispatch();
+
   const { onBeforeRemoveUser } = useUsersLisetDesp();
   const getConfirmation = useGetConfirmation();
-  const removeUser = useUsers((s) => s.removeUser);
 
   return async (userId: string) => {
     const confirmation = await getConfirmation({
@@ -16,6 +18,6 @@ export function useRemoveUser() {
 
     onBeforeRemoveUser(userId);
 
-    await removeUser(userId);
+    await dispatch(usersStore.actions.removeUser(userId));
   };
 }

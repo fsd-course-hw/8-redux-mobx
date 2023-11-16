@@ -1,34 +1,39 @@
 import clsx from "clsx";
-import { useBoardStore } from "../../model/use-board-store";
 import { BoardColumn } from "./board-column";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import { useBoardActions } from "../../model/use-board-actions";
+import { useAppSelector } from "@/shared/lib/redux";
+import { boardStore } from "../../model/board.store";
 
 export function Board({ className }: { className?: string }) {
-  const boardStore = useBoardStore();
-  const columns = boardStore.useSelector((s) => s.board.cols);
-  const moveColumn = boardStore.useSelector((s) => s.moveColumn);
-  const moveCard = boardStore.useSelector((s) => s.moveBoardCard);
+  const board = useAppSelector(boardStore.selectors.selectBoard);
+  const columns = board?.cols ?? [];
+
+  const { moveBoardCard, moveColumn } = useBoardActions();
 
   return (
     <DragDropContext
       onDragEnd={(e) => {
         if (e.type === "column") {
           if (e.destination) {
-            moveColumn(e.source.index, e.destination?.index ?? 0);
+            moveColumn({
+              index: e.source.index,
+              newIndex: e.destination.index,
+            });
           }
         }
         if (e.type === "card") {
           if (e.destination) {
-            moveCard(
-              {
+            moveBoardCard({
+              start: {
                 colId: e.source.droppableId,
                 index: e.source.index,
               },
-              {
+              end: {
                 colId: e.destination.droppableId,
                 index: e.destination.index,
               },
-            );
+            });
           }
         }
       }}

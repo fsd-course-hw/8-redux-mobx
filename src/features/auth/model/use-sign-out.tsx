@@ -1,5 +1,10 @@
-import { useSession } from "@/entities/session";
+import { sessionStore } from "@/entities/session";
+import { useAppDispatch } from "@/shared/lib/redux";
 
 export function useSignOut() {
-  return useSession((s) => s.removeSession);
+  const dispatch = useAppDispatch();
+
+  return () => {
+    dispatch(sessionStore.actions.removeSession());
+  };
 }

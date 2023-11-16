@@ -14,6 +14,7 @@ export type CreateTaskData = {
 };
 
 export type UpdateTaskData = {
+  id: string;
   title?: string;
   authorId?: string;
   description?: string;

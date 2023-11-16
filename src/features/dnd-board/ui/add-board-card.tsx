@@ -1,12 +1,12 @@
 import { UiTextField } from "@/shared/ui/ui-text-field";
 import { useState } from "react";
-import { useBoardStore } from "../model/use-board-store";
 import { useForm } from "react-hook-form";
+import { useBoardActions } from "../model/use-board-actions";
 
 export function AddBoardCard({ colId }: { colId: string }) {
   const [create, setCreate] = useState(false);
-  const boardStore = useBoardStore();
-  const addCard = boardStore.useSelector((s) => s.addBoardCard);
+
+  const { addBoardCard } = useBoardActions();
   const { register, handleSubmit, reset } = useForm<{ title: string }>({});
 
   if (!create) {
@@ -24,7 +24,10 @@ export function AddBoardCard({ colId }: { colId: string }) {
   return (
     <form
       onSubmit={handleSubmit((data) => {
-        addCard(colId, data.title);
+        addBoardCard({
+          colId,
+          title: data.title,
+        });
         reset();
       })}
     >

@@ -1,4 +1,4 @@
-export { useUsers } from "./model/users.store";
+export { usersStore } from "./model/users.store";
 export type { User } from "./model/types";
 export { getAvatarUrl } from "./ui/get-avatar-url";
 export { AvatarsList } from "./ui/avatar-list";

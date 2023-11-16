@@ -1,14 +1,15 @@
-import { abilityContext, useAbilityFactory } from "@/features/auth";
+import { AbilityProvider } from "@/features/auth";
 import { ComposeChildren } from "@/shared/lib/react";
 import { Confirmations } from "@/widgets/confirmations";
+import { Provider } from "react-redux";
+import { store } from "@/shared/lib/redux";
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const ability = useAbilityFactory();
-
   return (
     <ComposeChildren>
+      <Provider store={store} children={null} />
       <Confirmations />
-      <abilityContext.Provider value={ability} />
+      <AbilityProvider />
       {children}
     </ComposeChildren>
   );

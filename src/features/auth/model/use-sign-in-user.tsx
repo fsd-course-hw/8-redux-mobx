@@ -1,13 +1,16 @@
-import { useSession } from "@/entities/session";
+import { sessionStore } from "@/entities/session";
 import { User } from "@/entities/user";
+import { useAppDispatch } from "@/shared/lib/redux";
 
 export function useSignInUser() {
-  const createSession = useSession((s) => s.createSession);
+  const dispatch = useAppDispatch();
 
   return (user: User) => {
-    createSession({
-      userId: user.id,
-      ...user,
-    });
+    dispatch(
+      sessionStore.actions.createSession({
+        userId: user.id,
+        ...user,
+      }),
+    );
   };
 }

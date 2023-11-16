@@ -1,10 +1,11 @@
-import { UserPreview, useUsers } from "@/entities/user";
+import { UserPreview, usersStore } from "@/entities/user";
 import { useUsersLisetDesp } from "../deps";
 import { useRemoveUser } from "../model/use-remove-user";
 import { RemoveIcon } from "@/shared/ui/ui-icons";
+import { useAppSelector } from "@/shared/lib/redux";
 
 export function UsersList({ className }: { className?: string }) {
-  const { users } = useUsers();
+  const users = useAppSelector(usersStore.selectors.selectAll);
   const removeUser = useRemoveUser();
   const { renderUserAuthAction } = useUsersLisetDesp();
 

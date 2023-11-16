@@ -1,23 +1,31 @@
-import { useSession } from "@/entities/session";
-
 import { createStrictContext, useStrictContext } from "@/shared/lib/react";
 import { subject } from "@casl/ability";
 import { useMemo } from "react";
 import { Ability, abilityFactory } from "./ability-factory";
+import { useAppSelector } from "@/shared/lib/redux";
+import { sessionStore } from "@/entities/session";
 
-export const abilityContext = createStrictContext<Ability>();
+const abilityContext = createStrictContext<Ability>();
 
-export const useAbility = () => {
-  return useStrictContext(abilityContext);
-};
-export { subject };
-
-export const useAbilityFactory = () => {
-  const session = useSession((s) => s.currentSession);
+export const AbilityProvider = ({
+  children,
+}: {
+  children?: React.ReactNode;
+}) => {
+  const session = useAppSelector(sessionStore.selectors.selectSession);
 
   const ability = useMemo(() => {
     return abilityFactory(session);
   }, [session]);
 
-  return ability;
+  return (
+    <abilityContext.Provider value={ability}>
+      {children}
+    </abilityContext.Provider>
+  );
 };
+
+export const useAbility = () => {
+  return useStrictContext(abilityContext);
+};
+export { subject };

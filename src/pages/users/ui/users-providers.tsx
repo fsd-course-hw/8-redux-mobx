@@ -1,5 +1,5 @@
-import { useBoards } from "@/entities/board";
-import { useSession } from "@/entities/session";
+import { boardsStore } from "@/entities/board";
+import { sessionStore } from "@/entities/session";
 import {
   SignInUserButton,
   SignOutButton,
@@ -7,25 +7,26 @@ import {
   useAbility,
 } from "@/features/auth";
 import { usersListDespContext } from "@/features/users-list";
+import { useAppDispatch, useAppSelector } from "@/shared/lib/redux";
 
 export const UsersPageProviers = ({
   children,
 }: {
   children?: React.ReactNode;
 }) => {
-  const ability = useAbility();
-  const removeSession = useSession((s) => s.removeSession);
+  const dispatch = useAppDispatch();
+  const session = useAppSelector(sessionStore.selectors.selectSession);
 
-  const removeAuthorFromBoards = useBoards(
-    (board) => board.removeAuthorFromBoards,
-  );
+  const ability = useAbility();
 
   return (
     <usersListDespContext.Provider
       value={{
         onBeforeRemoveUser: async (userId) => {
-          await removeSession();
-          await removeAuthorFromBoards(userId);
+          if (session?.userId === userId) {
+            await dispatch(sessionStore.actions.removeSession());
+          }
+          await dispatch(boardsStore.actions.removeAuthorBoards({ userId }));
         },
         renderUserAuthAction: (user) => {
           const canSignIn = ability.can(

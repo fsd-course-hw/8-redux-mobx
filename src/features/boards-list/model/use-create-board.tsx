@@ -1,16 +1,19 @@
-import { CreateBoardData, useBoards } from "@/entities/board";
+import { CreateBoardData, boardsStore } from "@/entities/board";
 import { useBoardsListDeps } from "../deps";
-import { useSession } from "@/entities/session";
+import { useAppDispatch, useAppSelector } from "@/shared/lib/redux";
+import { sessionStore } from "@/entities/session";
 
 export function useCreateBoard() {
-  const createBoardRaw = useBoards((s) => s.createBoard);
+  const dispatch = useAppDispatch();
   const { canCreateBoard } = useBoardsListDeps();
-  const ownerId = useSession((s) => s.currentSession?.userId);
+  const ownerId = useAppSelector(
+    (s) => sessionStore.selectors.selectSession(s)?.userId,
+  );
 
   const createBoard = async (data: CreateBoardData, onCreate: () => void) => {
     if (!canCreateBoard() || !ownerId) return;
 
-    await createBoardRaw({ ...data, ownerId: ownerId });
+    await dispatch(boardsStore.actions.createBoard({ ...data, ownerId }));
 
     onCreate();
   };

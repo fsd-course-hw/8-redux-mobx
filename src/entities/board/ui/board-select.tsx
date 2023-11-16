@@ -1,5 +1,7 @@
-import { BoardPartial, useBoards } from "@/entities/board";
+import { BoardPartial } from "@/entities/board";
 import { UiSelect } from "@/shared/ui/ui-select-field";
+import { boardsStore } from "../model/boards.store";
+import { useAppSelector } from "@/shared/lib/redux";
 
 export function BoardSelect({
   className,
@@ -19,10 +21,11 @@ export function BoardSelect({
   required?: boolean;
   filterOptions?: (board: BoardPartial) => boolean;
 }) {
-  const board = useBoards((s) =>
-    boardId ? s.getBoardById(boardId) : undefined,
+  const board = useAppSelector((store) =>
+    boardsStore.selectors.selectBoardById(store, boardId),
   );
-  const boards = useBoards((s) => s.boards.filter(filterOptions));
+  let boards = useAppSelector(boardsStore.selectors.selectBoards);
+  boards = boards.filter(filterOptions);
 
   const options = required ? boards : [undefined, ...boards];
 
