@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/shared/lib/redux";
 import { boardStore } from "./board.store";
+import { boardSearchStore } from "./board-search.store";
 
 export const useFetchBoard = (boardId?: string) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -8,16 +9,21 @@ export const useFetchBoard = (boardId?: string) => {
 
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
+  const fetch = useCallback(async () => {
     if (!boardId) {
       return;
     }
 
-    setIsLoading(true);
-    dispatch(boardStore.actions.loadBoard({ boardId })).finally(() => {
-      setIsLoading(false);
-    });
+    dispatch(boardSearchStore.actions.resetQuery());
+    await dispatch(boardStore.actions.loadBoard({ boardId }));
   }, [boardId, dispatch]);
 
-  return { board, isLoading };
+  useEffect(() => {
+    setIsLoading(true);
+    fetch().finally(() => {
+      setIsLoading(false);
+    });
+  }, [fetch]);
+
+  return { board, isLoading, fetch };
 };

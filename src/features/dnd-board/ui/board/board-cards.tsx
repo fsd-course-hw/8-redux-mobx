@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { useBoardActions } from "../../model/use-board-actions";
 import { useAppSelector } from "@/shared/lib/redux";
+import { boardSearchStore } from "../../model/board-search.store";
 
 export function BoardCards({
   col,
@@ -53,7 +54,13 @@ function BoardCardComponent({
     usersStore.selectors.selectById(s, card.assigneeId ?? ""),
   );
 
+  const compareQuery = useAppSelector((s) =>
+    boardSearchStore.selectors.compareQuery(s, card.title),
+  );
+
   const { updateBoardCard, removeBoardCard } = useBoardActions();
+
+  if (!compareQuery) return null;
 
   return (
     <Draggable draggableId={card.id} index={index} key={card.id}>
